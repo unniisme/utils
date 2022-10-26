@@ -154,9 +154,16 @@ class Vector2:
 
     #Vector operators
     def lerp(start, end, t):
+        """
+        Linear Interpolation.
+        Returns the vector at t fraction from start to end
+        """
         return start + t*(end-start)
 
     def slerp(start, end, t : float, omega=90):
+        """
+        Spherical interpolation.
+        """
         omega = math.radians(omega)
 
         return ((math.sin((1-t)*omega)/math.sin(omega)) * start) + ((math.sin((t)*omega)/math.sin(omega))*end)
