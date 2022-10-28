@@ -1,7 +1,137 @@
 import math
 
-class Vector2:
+class Vector:
     fp_precision = 10**(-13)
+
+    #Overrides
+
+    #Constructors
+    def __init__(self, *args):
+        
+        if hasattr(args[0], '__iter__'):
+            self.elements = tuple(args[0])
+        else:
+            self.elements = tuple(args)
+        self.dimensions = len(self.elements)
+        self.magnitude = self.Magnitude()
+
+    def asTuple(self) -> tuple:
+        """Returns the vector as a tuple"""
+        return self.elements
+
+
+    #Shell representation
+    def __repr__(self):
+        return f"Vector{self.elements}"
+
+    #Print function
+    def __str__(self):
+        return str(self.elements)
+
+    #indexing
+    def __getitem__(self, index):
+        return self.elements[index]
+
+    #Writing index
+    def __setitem__(self, index, item):
+        self.elements[index] = item      
+
+
+    # +
+    def __add__(self, other) -> 'Vector':
+        if self.dimensions != other.dimensions:
+            raise ValueError("Dimension mismatch")
+        return Vector(x+y for x,y in zip(self.elements, other.elements))
+        
+    # additive inverse
+    def __neg__(self) -> 'Vector':
+        return Vector((-x) for x in self.elements)
+
+    # -
+    def __sub__(self, other) -> 'Vector':
+        return self + (-other)
+
+    # *
+    def __mul__(self, scalar) -> 'Vector':
+        if type(scalar) != int and type(scalar) != float:
+            raise TypeError("scalar has to be an int or a float")
+        return Vector(x*scalar for x in self.elements)
+
+    # * but from the left
+    def __rmul__(self, scalar) -> 'Vector':
+        if type(scalar) != int and type(scalar) != float:
+            raise TypeError("scalar has to be an int or a float")
+        return Vector(x*scalar for x in self.elements)
+
+    # /
+    def __truediv__(self, scalar) -> 'Vector':
+        if type(scalar) != int and type(scalar) != float:
+            raise TypeError("scalar has to be an int or a float")
+        return self * (1/scalar)
+
+    #compare if 2 floats are as close as to be considered equal
+    def PrecisionEquality(a,b):
+        return abs(a-b)<Vector.fp_precision
+
+    # ==
+    def __eq__(self, o:'Vector') -> bool:
+        if o==None:
+            return False
+        if self.dimensions != o.dimensions:
+            return False
+        return all([Vector.PrecisionEquality(x, y) for x,y in zip(self.elements, o.elemnts)])
+
+
+    #Other operators
+    
+    def Magnitude(self):
+        """Returns the magnitude of the vector"""
+        return math.sqrt(sum([pow(x,2) for x in self.elements]))
+
+    def Dot(a:'Vector', b:'Vector'):
+        """
+        Returns the dot product a.b
+        Usage: Dot(a,b) or a.Dot(b)
+        """
+        if a.dimensions != b.dimensions:
+            raise ValueError("Dimension mismatch")
+
+        return sum([x*y for x,y in zip(a.elements, b.elements)])
+
+    
+    def Normalized(self):
+        """Returns the unit vector in the direction of the input vector"""
+        return self/self.magnitude
+
+    def IntClamp(self):
+        """Round the vector to the nearest integer vector"""
+        return Vector(*map(int, self.elements))
+
+
+    #Vector operators
+    def lerp(start, end, t):
+        """
+        Linear Interpolation.
+        Returns the vector at t fraction from start to end
+        """
+        return start + t*(end-start)
+
+    def slerp(start, end, t : float, omega=90):
+        """
+        Spherical interpolation.
+        """
+        omega = math.radians(omega)
+
+        return ((math.sin((1-t)*omega)/math.sin(omega)) * start) + ((math.sin((t)*omega)/math.sin(omega))*end)
+
+
+    #global constants
+    def ZERO(n):
+        return Vector(*(0 for i in range(n)))
+
+
+
+class Vector2(Vector):
 
     #Overrides
 
@@ -86,15 +216,11 @@ class Vector2:
             raise TypeError("scalar has to be an int or a float")
         return self * (1/scalar)
 
-    #compare if 2 floats are as close as to be considered equal
-    def PrecisionEquality(a,b):
-        return abs(a-b)<Vector2.fp_precision
-
     # ==
     def __eq__(self, o:'Vector2'):
         if o==None:
             return False
-        return Vector2.PrecisionEquality(self[0], o[0]) and Vector2.PrecisionEquality(self[1], o[1])
+        return Vector.PrecisionEquality(self[0], o[0]) and Vector2.PrecisionEquality(self[1], o[1])
 
 
     #Other operators
