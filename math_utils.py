@@ -73,6 +73,9 @@ class Vector:
     def PrecisionEquality(a,b):
         return abs(a-b)<Vector.fp_precision
 
+    def PrecisionClamp(a):
+        return 0 if Vector3.PrecisionEquality(a, 0) else a
+
     # ==
     def __eq__(self, o:'Vector') -> bool:
         if o==None:
@@ -124,6 +127,15 @@ class Vector:
 
         return ((math.sin((1-t)*omega)/math.sin(omega)) * start) + ((math.sin((t)*omega)/math.sin(omega))*end)
 
+    def Components(a, b):
+        """
+        Split a into parallel and perpendicular components wrt b 
+        returns (parellel, perpendicular)
+        """
+        parallel = (a.Dot(b)/(b.magnitude**2)) * b
+        perpendicular = a - parallel
+        return (parallel, perpendicular)
+
 
     #global constants
     def ZERO(n):
@@ -139,10 +151,13 @@ class Vector2(Vector):
     def __init__(self, x, y=None):
         """A Tuple/list/iterable can be used as inputs as well"""
         if y == None:
-            y = x[1]
+            try:
+                y = x[1]
+            except:
+                y=0
             x = x[0]
-        self.x = x
-        self.y = y
+        self.x = Vector.PrecisionClamp(x)
+        self.y = Vector.PrecisionClamp(y)
         self.magnitude = self.Magnitude()
 
     def PolarConstructor(r, t):
@@ -315,14 +330,37 @@ class Vector3(Vector):
     def __init__(self, x, y=None, z=None):
         """A Tuple/list/iterable can be used as inputs as well"""
         if y == None:
-            z = x[2]
-            y = x[1]
+            try:
+                z = x[2]
+            except:
+                z = 0
+            try:
+                y = x[1]
+            except:
+                y = 0
             x = x[0]
-        self.x = x
-        self.y = y
-        self.z = z
+        self.x = Vector.PrecisionClamp(x)
+        self.y = Vector.PrecisionClamp(y)
+        self.z = Vector.PrecisionClamp(z)
         self.magnitude = self.Magnitude()
 
+    def SphericalConstructor(r, theta, phi):
+        """
+        theta is about y axis, phi is from y axis
+        """
+        return Vector3(r * math.sin(theta) * math.cos(phi), r * math.cos(theta), r * math.sin(theta) * math.sin(phi))
+
+    def SphericalConstructorDeg(r, theta, phi):
+        return Vector3.SphericalConstructor(r, math.radians(theta), math.radians(phi))
+
+    def CylinderConstructor(r, h, theta):
+        """
+        Cylinder axis is y
+        """
+        return Vector3(r*math.cos(theta), h, r*math.sin(theta))
+
+    def CylinderConstructorDeg(r, h, theta):
+        return Vector3.CylinderConstructor(r, h, math.radians(theta))
     
     def asTuple(self) -> tuple:
         """Returns the vector as a tuple"""
@@ -382,7 +420,7 @@ class Vector3(Vector):
     def __rmul__(self, scalar) -> 'Vector3':
         if type(scalar) != int and type(scalar) != float:
             raise TypeError("scalar has to be an int or a float")
-        return Vector3(self[0]*scalar, self[1]*scalar, self[1]*scalar)
+        return Vector3(self[0]*scalar, self[1]*scalar, self[2]*scalar)
 
     # /
     def __truediv__(self, scalar) -> 'Vector3':
@@ -431,18 +469,22 @@ class Vector3(Vector):
         """returns the angle in radians between 2 vectors"""
         return math.acos(self.Dot(other)/(self.magnitude * other.magnitude))
 
-
     def AngleDeg(self, other:'Vector3'):
         """returns the angle in degrees between 2 vectors"""
         return math.degrees(self.Angle(other))
 
-    def Rotate(self, angle):
+    def Rotate(self, angle, axis):
         """returns a vector rotated by angle in radians"""
-        raise NotImplementedError
+        pl, ppx = self.Components(axis)
+        ppy = ppx.Cross(axis)/axis.magnitude
 
-    def RotateDeg(self, angle):
+        return pl+ppx*math.cos(angle)+ppy*math.sin(angle)
+        
+
+
+    def RotateDeg(self, angle, axis):
         """returns a vector rotated by angle in degrees"""
-        raise NotImplementedError
+        return self.Rotate(math.radians(angle), axis)
 
     def IntClamp(self):
         """Round the vector to the nearest integer vector"""
