@@ -84,6 +84,21 @@ class Vector:
             return False
         return all([Vector.PrecisionEquality(x, y) for x,y in zip(self.elements, o.elemnts)])
 
+    # Iterable
+
+    def __iter__(self):
+        self.currIt = 0
+        return self
+
+    def __next__(self):
+        try:
+            currIt += 1
+            return self.elements[currIt - 1]
+
+        except:
+            del self.currIt
+            raise StopIteration
+
 
     #Other operators
     
@@ -236,6 +251,19 @@ class Vector2(Vector):
         if o==None:
             return False
         return Vector.PrecisionEquality(self[0], o[0]) and Vector.PrecisionEquality(self[1], o[1])
+
+    # Interable
+    def __iter__(self):
+        self.currIt = 0
+        return self
+
+    def __next__(self):
+        if self.currIt < 2:
+            self.currIt += 1
+            return self[self.currIt - 1]
+
+        del self.currIt
+        raise StopIteration
 
 
     #Other operators
@@ -433,6 +461,19 @@ class Vector3(Vector):
         if o==None:
             return False
         return Vector.PrecisionEquality(self[0], o[0]) and Vector.PrecisionEquality(self[1], o[1]) and Vector.PrecisionEquality(self[2], o[2])
+
+    # Iterable
+    def __iter__(self):
+        self.currIt = 0
+        return self
+
+    def __next__(self):
+        if self.currIt < 3:
+            self.currIt += 1
+            return self[self.currIt - 1]
+
+        del self.currIt
+        raise StopIteration
 
 
     #Other operators
