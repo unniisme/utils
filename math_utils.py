@@ -1,7 +1,9 @@
 import math
 
+PI = 3.14159265
+
 class Vector:
-    fp_precision = 10**(-13)
+    fp_precision = 10**(-8)
 
     #Overrides
 
