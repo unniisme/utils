@@ -272,7 +272,11 @@ class Vector2(Vector):
     
     def Magnitude(self):
         """Returns the magnitude of the vector"""
-        return math.sqrt(self[0]**2 + self[1]**2)
+        return math.sqrt(self.SqMagnitude())
+
+    def SqMagnitude(self):
+        """Returns Square of magnitude of the vector"""
+        return self[0]**2 + self[1]**2
 
     def Dot(self, b):
         """
